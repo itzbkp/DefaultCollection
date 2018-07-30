@@ -1,0 +1,585 @@
+﻿@{
+    ViewBag.Title = "IMDB - Presented for DeltaX";
+    Layout = "~/Views/Shared/Layout.cshtml";
+}
+<!DOCTYPE html>
+
+<html>
+
+
+
+<body @*style="background-image: url('Images/wallpaper.jpeg');"*@>
+
+	<!-- Styling to keep the Movies modal at the center -->
+    <style>
+        #updMovies.modal {
+            text-align: center;
+            padding: 0!important;
+        }
+
+        #updMovies.modal:before {
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+            margin-right: -4px;
+            }
+
+        #updMovies.modal-dialog {
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
+
+	
+	<!-- The main container -->
+    <div class="container">
+
+	
+	<!-- About section -->
+        <div class="alert alert-info alert-dismissible fade show" id="about" style="display: none; margin-top: 10px">
+            <strong>IMDB.com</strong> Downloaded from <a href="https://github.com/itzbkp/DefaultCollection" target="_blank"> <i class="glyphicon glyphicon-github" style="font-size: small; color: #212529"></i>GitHub</a>
+        </div>
+
+	
+	<!-- Movies carousel gridview -->	
+        <div id="movies" class="carousel slide" data-ride="carousel" style="margin-top: 200px">
+            <ul class="carousel-indicators" id="moviesgrid"></ul>
+            <div class="carousel-inner" id="moviesinnergrid"></div>
+
+            <a class="carousel-control-prev" href="#movies" data-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </a>
+            <a class="carousel-control-next" href="#movies" data-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </a>
+        </div>
+
+		
+		<!-- Form Post to save Movie details with an image -->	
+        @using (Html.BeginForm("Index", "Home", FormMethod.Post, new { @enctype = "multipart/form-data" }))
+        {
+		
+            <div id="updMovies" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content" style="width: 800px; height: 400px">
+                        <input type="file" accept="image/*" id="umPosterfile" name="umPosterfile" style="display: none" />
+
+                        <div class="modal-body" id="umPoster" onclick="$('#umPosterfile').click();" style="cursor: pointer">
+                            <button type="button" class="close" id="close" data-dismiss="modal">&times;</button>
+                        </div>
+
+                        <div class="modal-footer justify-content-start">
+                            <input type="hidden" id="umId" name="umId" />
+                            <input type="hidden" id="prevImgName" name="prevImgName" />
+                            <input type="text" id="umName" name="umName" class="form-control" style="width: 200px; border-top: none; border-right: none; border-left: none; box-shadow: none" placeholder="Name" />
+
+                            <div class="input-group" style="width: 30%">
+                                <input type='text' class="form-control datepicker" id="umYear" name="umYear" placeholder="Year" style="border-top: none; border-right: none; border-left: none; box-shadow: none" />
+                                <div class="input-group-btn">
+                                    <button class="btn" type="submit" style="background-color: transparent; border-radius: 0px 0.25rem 0.25rem 0px; border: 1px solid #ced4da; border-left: none; border-top: none; border-right: none; border-left: none; box-shadow: none">
+                                        <i class="glyphicon glyphicon-calendar" style="font-size: small; color: #212529"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <input type="text" id="umPlot" name="umPlot" class="form-control" placeholder="Plot" style="border-top: none; border-right: none; border-left: none; box-shadow: none" />
+
+                            <input type="submit" class="btn btn-danger" style="box-shadow: none" value="Save" />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+			
+        }
+
+		
+		<!-- Celebrities modal -->
+        <div class="modal fade" id="castings" role="dialog">
+            <div class="modal-dialog">
+
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Celebrities</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="form-group col-md-8">
+                                <label for="cName">Name:</label><br>
+                                <select id="cName" style="width: 100%">
+                                </select>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="cRole">Role:</label><br>
+                                <input type="hidden" value="0" id="cRole" />
+                                <div class="btn-group">
+                                    <button type="button" id="toggleRole" class="btn btn-light dropdown-toggle" data-toggle="dropdown" style="background-color: transparent; border: 1px solid #aaa; border-radius: 0.25rem 0.25rem 0.25rem 0.25rem; height: 35px; width: 100%; padding-top: 1px"></button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#" id="dropRole"></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-5">
+                                <label for="cGender">Gender:</label><br>
+                                <input type="hidden" value="0" id="cGender" />
+                                <div class="btn-group btn-group-default">
+                                    <button type="button" class="btn btn-primary" id="maleBtn" style="box-shadow: none">Male</button>
+                                    <button type="button" class="btn btn-default" id="femaleBtn" style="box-shadow: none">Female</button>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-7">
+                                <label for="Date">Birth Date:</label>
+                                <div class="input-group">
+                                    <input type='text' class="form-control datepicker" style="box-shadow: none;" id="cDob" />
+                                    <div class="input-group-btn">
+                                        <button class="btn" type="submit" style="box-shadow: none; background-color: transparent; border-radius: 0px 0.25rem 0.25rem 0px; border: 1px solid #ced4da; border-left: none">
+                                            <i class="glyphicon glyphicon-calendar" style="font-size: small; color: #212529"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cBio">Bio:</label><br>
+                            <textarea rows="4" placeholder=" Describe Here..." style="border-radius: 4px; border: solid 1px #ced4da; width: 100%" id="cBio"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="margin-top: -15px">
+                        <button type="button" class="btn btn-success" data-dismiss="modal" style="margin-right: 10px" id="cSave">Save</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-right: 10px" id="cDelete">Delete</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" style="margin-right: 10px">Cancel</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+		
+		<!-- Movies modal -->
+        <div class="modal fade" id="addMovies" role="dialog">
+            <div class="modal-dialog">
+                
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Movies</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="form-group col-md-5">
+                                <input type="hidden" id="mprevImg"/>
+                                <input type="file" accept="image/*" id="mPoster" style="display: none" />
+                                <img id="mImg" src="Posters/movie.svg.png" alt="Choose Valid Image" width="160" class="img-thumbnail" onclick="$('#mPoster').click();" style="cursor: pointer" />
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <label for="mName">Name:</label><br>
+                                    <select id="mName" style="width: 100%">
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="Year">Release Year:</label>
+                                    <div class="input-group">
+                                        <input type='text' class="form-control datepicker" style="box-shadow: none;" id="mYear" />
+                                        <div class="input-group-btn">
+                                            <button class="btn" type="submit" style="box-shadow: none; background-color: transparent; border-radius: 0px 0.25rem 0.25rem 0px; border: 1px solid #ced4da; border-left: none">
+                                                <i class="glyphicon glyphicon-calendar" style="font-size: small; color: #212529"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="mPlot">Plot:</label><br>
+                            <textarea rows="4" placeholder=" Describe Here..." style="border-radius: 4px; border: solid 1px #ced4da; width: 100%" id="mPlot"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="mActor">Actors:</label><br>
+                            <select id="mActor" style="width: 100%" multiple="multiple">
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mProducer">Producer:</label><br>
+                            <select id="mProducer" style="width: 100%">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="margin-top: -15px">
+                        <button type="button" class="btn btn-success" data-dismiss="modal" style="margin-right: 10px" id="mSave">Save</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-right: 10px" id="mDelete">Delete</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" style="margin-right: 10px">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        $(document).ready(function () {
+
+			//Load movies on Homepage
+            $.ajax({
+                type: "post",
+                datatype: "json",
+                url: '@Url.Action("AllMovies", "Home")',
+                success: function (response) {
+                    if (response.length != 0) {
+                        for (var index in response) {
+                            if (index == 0) {
+                                $('#moviesgrid').append('<li data-slide-to="' + index + '" class="active" value="' + response[index].record_ID + '"></li>');
+                                $('#moviesinnergrid').append('<div class="carousel-item active">' +
+                                '<img data-toggle="modal" data-target="#updMovies" src="posters\\' + response[index].poster + '" alt="' + response[index].name + '" width="1100" height="500" style="cursor: pointer">' +
+                                '<div class="carousel-caption">' +
+                                '<h3>' + response[index].name + ' (' + response[index].yearOfRelease + ')</h3>' +
+                                '<p>' + response[index].plot + '</p>' +
+                                '</div></div>');
+                            }
+                            else {
+                                $('#moviesgrid').append('<li data-slide-to="' + index + '" value="' + response[index].record_ID + '"></li>');
+                                $('#moviesinnergrid').append('<div class="carousel-item">' +
+                                '<img data-toggle="modal" data-target="#updMovies" src="posters\\' + response[index].poster + '" alt="' + response[index].name + '" width="1100" height="500" style="cursor: pointer">' +
+                                '<div class="carousel-caption">' +
+                                '<h3>' + response[index].name + ' (' + response[index].yearOfRelease + ')</h3>' +
+                                '<p>' + response[index].plot + '</p>' +
+                                '</div></div>');
+                            }
+
+                        }
+                    }
+                }
+            });
+
+
+            //Edit movie details from Homepage
+            $('#updMovies').on('show.bs.modal', function () {
+                if ($('#umId').val() == '') {
+                    $('#umPosterfile').val('');
+                    var flag = 0;
+                    $('#umName').val('');
+                    $('#umYear').val('');
+                    $('#umPlot').val('');
+                    $('#umId').val($('li.active').val());
+                    $('#umPoster').css('background-image', 'url("Posters//movie.svg.png")');
+                    $.ajax({
+                        type: "post",
+                        datatype: "json",
+                        url: '@Url.Action("MovieDetails", "Home")',
+                        data: { id: $('#umId').val() == undefined ? 0 : $('#umId').val() },
+                        success: function (response) {
+                            if (response.rows1.length != 0) {
+                                $('#umName').val(response.rows1[0].name);
+                                $('#umPoster').css('background-image', 'url("posters//' + response.rows1[0].poster + '")');
+                                $('#prevImgName').val(response.rows1[0].poster);
+                                $('#umYear').val(response.rows1[0].yearOfRelease);
+                                $('#umPlot').val(response.rows1[0].plot);
+                            }
+                        }
+                    });
+                }
+            });
+			$('#updMovies').on('hidden.bs.modal', function () {
+                $('#umId').val('');
+            });
+
+
+			//Choose Celebrities
+            $('#cName').on('change', function () {
+                $.ajax({
+                    type: "post",
+                    datatype: "json",
+                    url: '@Url.Action("CelebrityDetails", "Home")',
+                    data: { id: $('#cName').val() == undefined ? 0 : $('#cName').val() },
+                    success: function (response) {
+                        if (response.length != 0) {
+                            $('#cBio').val(response[0].bio);
+                            $('#cDob').val(response[0].date_Of_Birth);
+                            $('#cGender').val(response[0].sex).change();
+                            $('#cRole').val(response[0].role).change();
+                        }
+                    }
+                });
+            });
+
+
+			//Open Celebrities modal
+            $('#linkCast').on('click', function () {
+                $('#cName').html('');
+                $('#cDob').val('');
+                $('#cGender').val('false').change();
+                $('#cRole').val('1').change();
+                $('#cBio').val('');
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    url: '@Url.Action("GetCelebrities", "Home")',
+                    success: function (response) {
+                        for (var index in response)
+                            $('#cName').append('<option value=' + response[index].record_ID + '>' + response[index].name + '</option>');
+                        $('#cName').val(null).trigger('change');
+                    }
+                });
+            });
+
+
+			//Save Celebrities data
+            $('#cSave').on('click', function () {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        id: $('#cName').val() == undefined ? 0 : $('#cName').val(),
+                        name: $('#cName option:selected').html(),
+                        role: $('#cRole').val(),
+                        sex: ($('#cGender').val() == "") ? "true" : $('#cGender').val(),
+                        date_Of_Birth: $('#cDob').val(),
+                        bio: $('#cBio').val()
+                    },
+                    url: '@Url.Action("SaveCelebrity", "Home")',
+                    success: function (response) {
+                        if (response.length != 0 && response[0].Count == 1)
+                            toastr.success('Saved Successfully');
+                        else {
+                            console.log(response);
+                            toastr.error('Check console for Error Logs');
+                        }
+                    }
+                });
+            });
+
+
+			//Delete Celebrity
+            $('#cDelete').on('click', function () {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    data: { id: $('#cName').val() == undefined ? 0 : $('#cName').val() },
+                    url: '@Url.Action("DeleteCelebrity", "Home")',
+                    success: function (response) {
+                        if (response.length != 0 && response[0].Count == 1)
+                            toastr.success('Removed Successfully');
+                        else {
+                            console.log(response);
+                            toastr.error('Check console for Error Logs');
+                        }
+                    }
+                });
+            });
+
+
+			//Open Movies modal
+            $('#linkMovie').on('click', function () {
+                $('#mName').html('');
+                $('#mActor').html('');
+                $('#mProducer').html('');
+                $('#mPoster').val('');
+                $('#mImg').attr('src', 'Posters/movie.svg.png');
+                $('#mprevImg').val('movie.svg.png');
+                $('#mYear').val('');
+                $('#mPlot').val('');
+
+				//Get movie names
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    url: '@Url.Action("GetMovies", "Home")',
+                    success: function (response) {
+                        for (var index in response)
+                            $('#mName').append('<option value=' + response[index].record_ID + '>' + response[index].name + '</option>');
+                        $('#mName').selectize({
+                            create: function (input) {
+                                $('#mName')[0].selectize.removeOption(0);
+                                return {
+                                    value: '0',
+                                    text: input
+                                }
+                            }
+                        });
+                        $('#mName')[0].selectize.removeOption(0);
+                        $('#mName').selectize()[0].selectize.clear();
+                    }
+                });
+				
+				//Get actor names
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    url: '@Url.Action("GetActors", "Home")',
+                    success: function (response) {
+                        for (var index in response)
+                            $('#mActor').append('<option value=' + response[index].record_ID + '>' + response[index].name + '</option>');
+                        $('#mActor').selectize({
+                            create: function (input, callback) {
+                                $.ajax({
+                                    type: "post",
+                                    dataType: "json",
+                                    data: {
+                                        name: input,
+                                        role: 1,
+                                    },
+                                    url: '@Url.Action("AddCelebrity", "Home")',
+                                    success: function (response) {
+                                        if (response.length != 0 && response[0].Count == 1)
+                                            callback({
+                                                value: response[0].record_ID,
+                                                text: input
+                                            });
+                                        else {
+                                            console.log(response);
+                                            callback({
+                                                value: 0,
+                                                text: input
+                                            });
+                                        }
+                                    }
+                                });
+
+                            }
+                        });
+                        $('#mActor').selectize()[0].selectize.clear();
+                    }
+                });
+				
+				//Get Producer names
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    url: '@Url.Action("GetProducers", "Home")',
+                    success: function (response) {
+                        for (var index in response)
+                            $('#mProducer').append('<option value=' + response[index].record_ID + '>' + response[index].name + '</option>');
+                        $('#mProducer').selectize({
+                            create: function (input, callback) {
+                                $.ajax({
+                                    type: "post",
+                                    dataType: "json",
+                                    data: {
+                                        name: input,
+                                        role: 2,
+                                    },
+                                    url: '@Url.Action("AddCelebrity", "Home")',
+                                    success: function (response) {
+                                        if (response.length != 0 && response[0].Count == 1)
+                                            callback({
+                                                value: response[0].record_ID,
+                                                text: input
+                                            });
+                                        else {
+                                            console.log(response);
+                                            callback({
+                                                value: 0,
+                                                text: input
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                        $('#mProducer').selectize()[0].selectize.clear();
+                    }
+                });
+
+            });
+
+
+			//Select movie
+            $('#mName').on('change', function () {
+
+                if ($('#mName').val() != '0' && $('#mName').val() != '' && $('#mName').val() != null) {
+                    $('#mActor').selectize()[0].selectize.setValue('');
+                    $('#mProducer').selectize()[0].selectize.setValue('');
+                    $.ajax({
+                        type: "post",
+                        datatype: "json",
+                        url: '@Url.Action("MovieDetails", "Home")',
+                        data: { id: $('#mName').val() == undefined ? 0 : $('#mName').val() },
+                        success: function (response) {
+                            if (response.rows1.length != 0) {
+                                $('#mPlot').val(response.rows1[0].plot);
+                                if(response.rows1[0].poster == null) {
+									$('#mImg').attr('src', 'Posters/movie.svg.png');
+									$('#mprevImg').val('movie.svg.png');
+								}
+								else {
+									$('#mImg').attr('src', 'Posters/' + response.rows1[0].poster);
+									$('#mprevImg').val(response.rows1[0].poster);
+								}
+                                $('#mYear').val(response.rows1[0].yearOfRelease);
+                            }
+                            if (response.rows2.length != 0) {
+                                var arr = [];
+                                for (var index in response.rows2) {
+                                    if (response.rows2[index].role == 1)
+                                        arr.push(response.rows2[index].celebrity_id);
+                                    else
+                                        $('#mProducer').selectize()[0].selectize.setValue(response.rows2[index].celebrity_id);
+                                }
+                                $('#mActor').selectize()[0].selectize.setValue(arr);
+                            }
+                        }
+                    });
+                }
+            });
+
+
+			//Save movie details
+            $('#mSave').on('click', function () {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    data: {
+                        id: $('#mName').val() == undefined ? 0 : $('#mName').val(),
+                        name: $('#mName option:selected').html(),
+                        poster: $('#mprevImg').val(),
+                        year: ($('#mYear').val() == "") ? "2018" : $('#mYear').val(),
+                        plot: $('#mPlot').val(),
+                        actors: JSON.stringify($('#mActor').selectize()[0].selectize.getValue()),
+                        producer: $('#mProducer').selectize()[0].selectize.getValue()
+                    },
+                    url: '@Url.Action("SaveMovie", "Home")',
+                    success: function (response) {
+                        if (response.length != 0 && response[0].Count == 1) {
+                            $('#mName').selectize()[0].selectize.destroy();
+                            toastr.warning('Saved Successfully!! But please check console for logs');
+                            console.log('Images are not being uploaded through AJAX for now');
+                        }
+                        else {
+                            console.log(response);
+                            toastr.error('Check console for Error Logs');
+                        }
+                    },
+                });
+            });
+
+
+			//Delete movie
+            $('#mDelete').on('click', function () {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    data: { id: $('#mName').val() == undefined ? 0 : $('#mName').val() },
+                    url: '@Url.Action("DeleteMovie", "Home")',
+                    success: function (response) {
+                        if (response.length != 0 && response[0].Count == 1) {
+                            $('#mName').selectize()[0].selectize.destroy();
+                            toastr.success('Removed Successfully');
+                        }
+                        else {
+                            console.log(response);
+                            toastr.error('Check console for Error Logs');
+                        }
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/glyphicon.css" rel="stylesheet" />
+    <link href="~/Content/datetimepicker.min.css" rel="stylesheet" />
+    <link href="~/Content/selectize.css" rel="stylesheet" />
+    <link href="~/Content/select2.min.css" rel="stylesheet" />
+    <link href="~/Content/toastr.min.css" rel="stylesheet" />
+
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <script src="~/Scripts/popper.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/datetimepicker.min.js"></script>
+    <script src="~/Scripts/select2.min.js"></script>
+    <script src="~/Scripts/selectize.min.js"></script>
+    <script src="~/Scripts/toastr.min.js"></script>
+    <script src="~/Scripts/index.js"></script>
+	
+</head>
+
+<body>
+    @Html.Raw(ViewBag.ErrorToastr);
+    @if (ViewBag.rows == 1)
+    {
+        Html.Raw("<script>toastr.success('Saved Successfully')</script>");
+    }
+	
+	<!-- Navigation Bar -->
+	
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+        
+        <a class="navbar-brand" href="#">IMDB.com</a>
+
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="modal" data-target="#addMovies" href="#" id="linkMovie">Movies</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="modal" data-target="#castings" href="#" id="linkCast">Cast & Crew</a>
+            </li>
+			
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Help
+                </a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="http://bit.ly/dx-sample-mvc4" target="_blank">Assignment</a>
+                    <a class="dropdown-item" onclick="$('#about').show();" style="cursor: pointer">About</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    @RenderBody();
+</body>
+
+</html>
+
